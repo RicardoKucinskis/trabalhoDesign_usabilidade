@@ -1,0 +1,75 @@
+function BAcommon() {
+    this.env  = {};
+    this.ns   = {};
+    this.prfx = {};
+
+    this.env.ua       = navigator.userAgent;
+    this.env.isMac    = this.env.ua.match(/Mac/),
+        this.env.isWin    = this.env.ua.match(/Win/),
+        this.env.isWinXP    = this.env.ua.match(/Windows NT 5.1/),
+        this.env.isNN     = document.layers,
+        this.env.isMoz    = this.env.ua.match(/Gecko\//),
+        this.env.isN6     = this.env.ua.match(/Netscape6\//),
+        this.env.isSafari = this.env.ua.match(/AppleWebKit/),
+        this.env.isOpera  = (window.opera);
+    this.env.isIE     = (document.all && !this.env.isOpera);
+    this.env.DOMok    = (document.documentElement && document.getElementsByTagName);
+    this.ns.rootNS    = (this.env.DOMok) ? document.documentElement.namespaceURI : null
+    this.ns.xhtml1    = 'http://www.w3.org/1999/xhtml';
+    this.ns.bAattrs   = 'urn:bA.attrs';
+    this.prfx.bAattrs = 'bAattrs:';
+    this.sharedDir    = '/design/shared/css/';
+
+    this.showErrMsg   = false;
+}
+
+var tinyBA = new BAcommon();
+
+function loadReviseCSS() {
+    var prefix = 'yd_';
+    var suffix = '.css';
+
+    var label  = (tinyBA.env.isNN  && tinyBA.env.isWin) ? 'forwn4':
+        (tinyBA.env.isNN  && tinyBA.env.isMac) ? 'formn4':
+            '';
+
+    if (label) {
+        var href = tinyBA.sharedDir + prefix + label + suffix;
+        document.write('<link rel="stylesheet" type="text/css" href="' + href + '">');
+    }
+}
+
+loadReviseCSS();
+
+function loadReviseJS() {
+    if(!document.layers){
+        document.write('<script type="text/javascript" src="/design/shared/js/yd_rollover.js"><\/script>');
+    }
+}
+
+//loadReviseJS();
+
+function openYDWindow2( url, title, options, move ){
+    var usrWidth = (tinyBA.env.isMac) ? screen.width:screen.availWidth;
+    var usrHeight =(tinyBA.env.isMac) ? screen.height:screen.availHeight;
+
+    if(( usrWidth > 1014 ) && ( usrHeight > 652 )){
+        options = "toolbar=no,location=no,directories=no,status=yes,menubar=no,scrollbars=no,resizable=yes,favorites=no";
+        var YDoptions = "width=" + usrWidth + ",height=" + usrHeight + ",left=0,top=0," + options;
+        newWin = window.open( url, title, YDoptions );
+        newWin.focus();
+    }
+
+    else{
+        options = "toolbar=no,location=no,directories=no,status=yes,menubar=no,scrollbars=yes,resizable=yes,favorites=no";
+        var YDoptions = "width=" + usrWidth + ",height=" + usrHeight + ",left=0,top=0," + options;
+        newWin = window.open( url, title, YDoptions );
+        newWin.focus();
+    }
+}
+
+// photoswipe initialize
+
+window.onload = function(){
+    initPhotoSwipeFromDOM(".my-gallery");
+}

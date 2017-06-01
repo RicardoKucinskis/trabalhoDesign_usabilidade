@@ -1,0 +1,285 @@
+(function($){
+    $.fn.shuffle = function() {
+        return this.each(function(){
+            var items = $(this).children();
+            return (items.length)
+                ? $(this).html($.shuffle(items))
+                : this;
+        });
+    }
+    $.shuffle = function(arr) {
+        for(
+            var j, x, i = arr.length; i;
+            j = parseInt(Math.random() * i),
+                x = arr[--i], arr[i] = arr[j], arr[j] = x
+        );
+        return arr;
+    }
+    var $w = $(window);
+    var $vws = {};
+    $(function(){
+        $w.resize(onresize);
+        $(".col-vw-full").after('<div class="col-vw-full-dummy"></div>');
+        $vws = $(".col-vw-full");
+        $w.trigger("resize");
+    });
+    function onresize(e){
+        var ww = $w.width();
+        $vws.each(function(){
+            var $this = $(this);
+            var $dmy = $this.next();
+            var mw = Math.min(0,($dmy.width() - ww) * 0.5);
+            $this.css({marginLeft:mw,marginRight:mw})
+        });
+    }
+    function get_url_vars()
+    {
+        var vars = new Object, params;
+        var temp_params = window.location.search.substring(1).split('&');
+        for(var i = 0; i <temp_params.length; i++) {
+            params = temp_params[i].split('=');
+            vars[params[0]] = params[1];
+        }
+        return vars;
+    }
+    var _synapses_inited = false;
+    var $originals = "";
+
+function filterItem(initial_key){
+    var openCount = 1;
+    var openRow = 12;
+    var $listMore = $("#listMore");
+    $listMore.click(function(){
+        if(!$(this).hasClass("disable")) {
+            openCount++;
+            showMore();
+        }
+        return false;
+
+    });
+    $(".list-keyword-inner button").click(function(){
+        var that = this;
+        var $oldActive =  $(".list-keyword-inner").find('button[aria-pressed="true"]');
+        $oldActive.attr("aria-pressed","false");
+        $(that).attr("aria-pressed","true");
+        var type = $(that).hasClass("btn-keyword") ? "keyword" : "category";
+        filtering($(that).val(),type);
+        return false;
+    });
+
+
+    var $item = $("#list-item .item");
+    var $currentItems = $($originals);
+    var category = "all";
+    function showMore(){
+        var index = openRow * openCount -1;
+        if($currentItems.length > index){
+            $(".btn-seemore").attr("aria-hidden","false");
+        }else{
+            $(".btn-seemore").attr("aria-hidden","true");
+        }
+        var $close = $currentItems.filter(":gt('"+ index +"')");
+        var $open = $currentItems.filter(":lt('"+ (index + 1) +"')");
+
+        //var $next = $item.lt(openRow * openCount -1);
+        $close.stop(true,true,true).fadeOut(0);
+        $open.stop(true,true,true).fadeIn(300);
+        var newOpenFocusIndex = index - openRow + 1;
+        if(newOpenFocusIndex > openRow -1){
+            $open.eq(newOpenFocusIndex).find("a").focus();
+
+        }
+        // $open.fadeIn(300,function(){
+        //     $(window).trigger("changeGoodsPage");
+        // });
+        if($currentItems.length <= openRow * openCount){
+            $listMore.addClass("disable");
+        }else{
+            $listMore.removeClass("disable");
+        }
+    }
+
+    function filtering(key,type){
+        $("#list-item").html("");
+        $currentItems =  $($originals);
+
+        if(key != "all"){
+            $currentItems = $currentItems.filter("[data-"+ type +"*='" + key + "']");
+        }else{
+            $currentItems = $currentItems;
+        }
+        $("#list-item").append($currentItems);
+        openCount = 1;
+        var index = openRow * openCount -1;
+        var $open = $currentItems.filter(":lt("+ (index + 1) +")");
+        var $close = $currentItems.filter(":gt('"+ index +"')");
+        if($open.length == 0){
+            $("#noResult").remove();
+            $("#list-item").prepend('<div id="noResult" class="col-xs-12"><p class="text-center">該当する製品がありません</p></div>');
+        }else{
+            $("#noResult").remove();
+        }
+        $close.stop(true,true,true).fadeOut(0);
+        $open.stop(true,true,true).delay(30).fadeOut(0).fadeIn(300);
+        if($currentItems.length <= openRow * openCount){
+            $listMore.addClass("disable");
+        }else{
+            $listMore.removeClass("disable");
+        }
+        if($currentItems.length <= index + openRow){
+            $(".btn-seemore").attr("aria-hidden","true");
+        }else{
+            $(".btn-seemore").attr("aria-hidden","false");
+        }
+        if(_synapses_inited == true){
+            $(".btn-sort[aria-pressed='true']").trigger("click");
+        }
+    }
+
+    $(".btn-sort").click(function(){
+        $(".btn-sort").attr('aria-pressed','false');
+        $(this).attr('aria-pressed','true');
+        sortItem($(this).val());
+        return false;
+    });
+    function sortItem(key,flg) {
+        if(key == "newest"){
+            $currentItems = $currentItems.sort(function(a, b) {
+                if(moment($(a).attr('data-date')).isBefore($(b).attr('data-date'))){
+                    return 1;
+                }
+                if(!moment($(a).attr('data-date')).isBefore($(b).attr('data-date'))){
+                    return -1;
+                }
+                return 0;
+            });;
+        }else if(key == "oldest"){
+            $currentItems = $currentItems.sort(function(a, b) {
+                if(moment($(a).attr('data-date')).isBefore($(b).attr('data-date'))){
+                    return -1;
+                }
+                if(!moment($(a).attr('data-date')).isBefore($(b).attr('data-date'))){
+                    return 1;
+                }
+                return 0;
+            });
+
+        }else if(key == "shuffle"){
+            if(flg == true){
+                var $newItems = $("#list-item").find(".new-item");
+                $("#list-item").shuffle();
+                $("#list-item").prepend($newItems);
+            }else{
+                $("#list-item").shuffle();
+            }
+            $currentItems = $($("#list-item").html());
+        }
+        $("#list-item").html($currentItems);
+        // $("#list-item").append($currentItems);
+        openCount = 1;
+        $currentItems.stop(true,true,true).fadeOut(0);
+
+        setTimeout(function(){
+            showMore();
+        },50)
+
+    }
+
+    if(initial_key !== "all"){
+        $(".list-keyword button[value*='"+ initial_key +"']").triggerHandler("click");
+        $(".list-keyword button[value*='"+ initial_key +"']").attr("aria-pressed","true");
+
+        setTimeout(function(){
+            sortItem("shuffle",true);
+            setTimeout(
+                function(){
+                    var adustY = $(".navbar-header").height() * 2;
+                    if($(window).scrollTop() > 53){
+                        adustY = $(".navbar-header").height();
+                    }
+                    $("body,html").animate({
+                        scrollTop:$("#synapse-filter-tab").offset().top - adustY - 15
+                    },500,null,function(){
+                        $("#list-item").find(".item:first a").focus();
+                    });
+                }
+            ,500);
+        },1000)
+    }else{
+        filtering(initial_key,"keyword");
+        setTimeout(function(){
+            sortItem("shuffle",true);
+        },1000)
+    }
+
+}
+
+var _query = get_url_vars();
+
+$(function(){
+    $originals = $("#list-item").html();
+    if(typeof _query.keyword !== "undefined" && _query.keyword !== ""){
+        $("#synapse-filter-tab li a[href*='#keyword']").tab('show');
+        filterItem(_query.keyword);
+    }else{
+        filterItem("all");
+    }
+
+    _synapses_inited = true;
+    setTimeout(function(){
+        $("#list-item").addClass("show");
+    },1000)
+
+});
+
+$(window).load(function(){
+    $("#synapse-filter-tab li a").on("click",function(e){
+        e.preventDefault();
+        $(this).tab('show');
+        return false;
+    });
+    $(".tab-close").click(function(e){
+        var target = $(this).attr("data-target");
+        var $tab = $('[aria-controls="'+ target +'"]');
+        $tab.attr('aria-expanded', false);
+        $tab.parent().removeClass("active");
+        $(this).parent().removeClass("active");
+
+        return false;
+    });
+});
+})(jQuery);
+
+/*
+$(function(){
+    $(".message-thumbnails li a").click(function(){
+        $(".message-thumbnails li").attr("aria-selected","false");
+        $(this).parent().attr("aria-selected","true");
+        $($(this).attr("href")).attr("aria-hidden","false").fadeOut(0).fadeIn().siblings().attr("aria-hidden","true").fadeOut(0);
+        return false;
+    })
+});
+    */
+
+$(function(){
+   $('input[data-toggle="enable"]').on("change",function () {
+       if($(this).prop("checked")){
+           $($(this).data("target")).attr("tabindex","0");
+       }else{
+           $($(this).data("target")).attr("tabindex","-1");
+       }
+   })
+});
+
+$(function()
+{
+    if(typeof Hammer !== "undefined"){
+        $('[data-ride="carousel"]').each(function(){
+            var $carousel = $(this);
+            var hammer = new Hammer($carousel[0]);
+            hammer.on('swipeleft', function(){ $carousel.carousel('next'); });
+            hammer.on('swiperight', function(){ $carousel.carousel('prev'); });
+        });
+    }
+
+});

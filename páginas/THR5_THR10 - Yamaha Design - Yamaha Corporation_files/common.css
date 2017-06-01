@@ -1,0 +1,72 @@
+.panel-heading small.text-black{
+    color: #000;
+}
+.row-center{
+    text-align:center;
+    letter-spacing:-0.4em;
+}
+.row-center > [class*='col-'] {
+    display:inline-block;
+    letter-spacing:0;
+    vertical-align:top;
+    float:none;
+    text-align: left;
+}
+/* /センタリンググリッド */
+
+/* 関連リンク */
+.panel-fluid{
+    margin-top: 80px;
+}
+@media (max-width:767px){
+    .panel-fluid{
+        margin-top: 40px;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+}
+.panel-fluid-special{
+    /*background-color: #F0F0E1;*/
+    background-color: #f9f9f3;
+    padding: 30px;
+}
+@media (max-width:767px){
+    .panel-fluid-special{
+        padding: 15px;
+    }
+}
+/* /関連リンク */
+
+/* footer margin */
+.global-footer-wrapper{
+    margin-top: 80px;
+}
+@media (max-width:767px){
+    .global-footer-wrapper{
+        margin-top: 40px;
+    }
+}
+a .row div[class*="col-"] h2 b{
+    font-weight: normal;
+}
+a:hover .row div[class*="col-"] h2 b,
+a:hover .row div[class*="col-"] p{
+    text-decoration: underline;
+}
+a:hover .row div[class*="col-"] h2 small{
+    text-decoration: none;
+}
+.row div[class*="col-"] p a{
+    text-decoration: underline;
+}
+.video-full{
+    width: 100%;
+    height: auto;
+}
+
+.voice,
+.voice i{
+    padding: 8px 0;
+    color: #444;
+    font-size: 14px;
+}
